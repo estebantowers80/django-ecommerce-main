@@ -1,0 +1,16 @@
+:root {
+    --blue: #335AFF;
+}
+
+.child-area {
+    min-height: 75vh
+}
+
+.checkcout-container {
+    margin: auto;
+    max-width: 90%;
+}
+
+.font-blue {
+    color: var(--blue);
+}

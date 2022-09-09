@@ -1,0 +1,174 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="checkcout-container">
+
+    <div class="row">
+        <div class="col-8">
+            <form id="order_form" class="needs-validation" onsubmit="processOrder(event); return false;" novalidate>
+                <fieldset>
+                    <legend>Datos del cliente:</legend>
+                    <div class="row">
+                        <div class="col">
+                            <label for="identification" class="form-label">Cédula o RUC:</label>
+                            <input type="text" class="form-control" id="identification" minlength="10" maxlength="13" required>
+                            <div class="invalid-feedback">
+                                Provea una cédula o RUC válido.
+                            </div>                        
+                        </div>
+                        <div class="col">      
+                            <label for="fullName" class="form-label">Nombres:</label>
+                            <input type="text" class="form-control" id="fullName" maxlength="75" required>
+                            <div class="invalid-feedback">
+                                Ingrese su nombre completo, máximo 75 caracteres.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="email" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="email" maxlength="40" required>
+                            <div class="invalid-feedback">
+                                Ingrese un email válido, máximo 40 caracteres.
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="cellphone" class="form-label">Celular:</label>
+                            <input type="text" class="form-control" id="cellphone" minlength="10" maxlength="10" required>
+                            <div class="invalid-feedback">
+                                Ingrese un celular válido.
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="mt-4">
+                    <legend>Dirección de envío:</legend>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="city" class="form-label">Ciudad:</label>
+                            <select id="city" class="form-select">
+                                <option value="Guayaquil" selected>Guayaquil</option>
+                                <option value="Quito">Quito</option>
+                                <option value="Cuenca">Cuenca</option>
+                                <option value="Ambato">Ambato</option>
+                                <option value="Sto. Domingo">Sto. Domingo</option>
+                                <option value="Esmeraldas">Esmeraldas</option>
+                                <option value="Manta">Manta</option>
+                            </select>
+                        </div>
+                        <div class="col-8">
+                            <label for="address" class="form-label">Dirección:</label>
+                            <input type="text" class="form-control" id="address" maxlength="200" required>
+                            <div class="invalid-feedback">
+                                Ingrese su dirección, máximo 200 caracteres.
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="row mt-5">                    
+                    <div class="col">
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success">Generar Pedido</button>                    
+                            <button type="button" class="btn btn-secondary" onclick="clean()">Limpiar</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-4">
+            <div class="row">
+                <div class="col">
+                    <ol class="list-group list-group-numbered">
+                        {% for item in shopping_cart %}
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">{{ item.product.name }}</div>
+                                    Cant: {{ item.quantity }}
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{ item.subtotal }}</span>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col">
+                    <h5 class="text-center">Total: <span>{{ total_cart }}</span></h6>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col">
+                    <div class="d-flex justify-content-center">
+                        <div class="btn-group" role="group" aria-label="controls-group">
+                            <button type="button" class="btn btn-warning" onclick="location.href='{% url 'index' %}'">Seguir comprando</button>
+                            <button type="button" class="btn btn-info" onclick="location.href='{% url 'cart' %}'">Ir al carrito</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+
+<script>
+    const processOrder = (event) => {
+
+        let form = document.getElementById('order_form');
+
+        let isValid = form.checkValidity();
+        form.classList.add('was-validated');
+
+        if (!isValid) {
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+            let identification = document.getElementById('identification').value;
+            let full_name = document.getElementById('fullName').value;
+            let email = document.getElementById('email').value;
+            let city = document.getElementById('city').value;
+            let address = document.getElementById('address').value;
+            let cellphone = document.getElementById('cellphone').value;
+            
+            let data = {
+                "identification": identification,
+                "full_name": full_name,
+                "email": email,
+                "city": city,
+                "address": address,
+                "cellphone": cellphone
+            }
+
+            console.log('Datos del formulario previo al envío al back-end: ', data);
+        
+            fetch("{% url 'processOrder' %}", {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {  "Content-type": "application/json; charset=UTF-8",
+                            "X-CSRFToken": "{{csrf_token}}"}
+            })
+            .then(res => {
+                if (res.status !== 201) 
+                    return res.json().then(errorAsJson => { throw Error(res.status + ": " + res.statusText + " => " + errorAsJson.error_msg) });
+                else
+                    return res.json();
+            })
+            .then(responseAsJson => {
+                alert('Su orden fue ingresada correctamente. Nro. Order: ' + responseAsJson.order_id);
+                window.location.href = "{% url 'index' %}"
+            })
+            .catch(error => alert(error));
+        }
+    }
+
+    const clean = () => {
+        document.getElementById('identification').value = "";
+        document.getElementById('fullName').value = "";
+        document.getElementById('email').value = "";        
+        document.getElementById('address').value = "";
+        document.getElementById('cellphone').value = "";
+
+        let form = document.getElementById('order_form');
+        form.classList.remove('was-validated');
+    }
+</script>
+{% endblock %}

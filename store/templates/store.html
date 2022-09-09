@@ -1,0 +1,57 @@
+{% extends "index.html" %}
+{% load static %}
+{% block content %}
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    
+  {% for prod in products %}  
+    <div class="col">
+      <div class="card h-100">
+        <img src="{{ prod.image.url }}" class="card-img-top">
+        <div class="card-body">
+          <h5 class="card-title">{{ prod.name }}</h5>
+          <p class="card-text">{{ prod.description }}</p>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex justify-content-between">
+            <p class="fw-bold fs-4 font-blue">$ {{ prod.price }}</p>
+            <button type="button" class="btn btn-primary" onclick="addToCart({{prod.id}})">Añadir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+   
+</div>
+
+<script>
+
+  const addToCart = (productId) => {        
+    const currentUser = "{{ request.user }}"
+
+    if (currentUser==='AnonymousUser'){
+      alert('Debe iniciar sesión para añadir items al carrito.');
+      return;
+    }
+    
+    console.log("Se está seleccionando el producto: " + productId + " para añadirlo al carrito.");
+
+      let data = {
+        "product_id": productId,
+        "quantity": 1
+      }
+
+      fetch("{% url 'addItem' %}", {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {  "Content-type": "application/json; charset=UTF-8",
+                      "X-CSRFToken": "{{csrf_token}}"}
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('cart-items-span').innerHTML = data.total_items;
+      });
+  }
+      
+</script>
+
+{% endblock %}

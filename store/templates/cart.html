@@ -1,0 +1,89 @@
+{% extends "index.html" %}
+
+{% block content %}
+{% if shopping_cart|length == 0 %}
+  <p class="text-center">Tu carrito está vacío</p>
+{% else %}
+  <div class="table-responsive">
+      <table class="table table-hover">
+          <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Imagen</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Subtotal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              {% for item in shopping_cart %}
+                <tr id="tr-{{item.product.id}}">
+                  <th scope="row">{{ forloop.counter }}</th>
+                  <td><img src="{{ item.product.image.url }}" width="100" height="75"></td>
+                  <td>{{ item.product.name }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.product.price }}</td>
+                  <td>{{ item.subtotal }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-danger" onclick="deleteFromCart('{{item.product.id}}')">-</button>
+                  </td>
+                </tr>
+              {% endfor %}
+              
+            </tbody>
+            <tfoot>
+                <tr>
+                  <td colspan="2"></td>
+                  <td><b>Total:</b></td>
+                  <td>{{ shopping_cart | length }}</td>
+                  <td></td>
+                  <td>$ {{ total_cart }}</td>
+                </tr>
+            </tfoot>          
+      </table>    
+  </div>
+  <div class="row">
+    <div class="col float-end">
+      <button type="button" class="btn btn-primary" onclick="gotoCheckout()">Checkout</button>
+    </div>
+  </div>
+{% endif %}
+
+<script>
+  const deleteFromCart = (productId) => {        
+      console.log("Se está seleccionando el producto: " + productId + " para quitarlo del carrito.");
+
+      let data = {
+          product_id: productId
+      }
+
+      fetch("{% url 'removeItem' %}", {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {  "Content-type": "application/json; charset=UTF-8",
+                      "X-CSRFToken": "{{csrf_token}}"}
+      })
+      .then(res => res.json())
+      .then(data => {
+          document.getElementById('cart-items-span').innerHTML = data.total_items;          
+          location.href = "{% url 'cart' %}";
+      });
+  }
+
+  const gotoCheckout = () => {
+    
+    let shoppingCartItems = "{{ shopping_cart|length }}";
+
+    if(shoppingCartItems > 0){
+      location.href = "{% url 'checkout' %}";
+    } else {
+      alert('Ud. no tiene items en su carrito.');
+    }
+    
+  }
+
+</script>
+{% endblock %}
