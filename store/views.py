@@ -10,6 +10,7 @@ import json
 from .cart import Cart
 from django.db import transaction
 from django.db.models import Q, Sum
+import datetime
 
 
 
@@ -40,6 +41,8 @@ def index(request):
 
         #probar suma de articulos 
         #print(OrderItem.objects.values('product__id','product__name','product__description','product__image').annotate(cantidad_venta=Sum('quantity')).order_by('-cantidad_venta'))
+        #probar listado de ordenes
+        #print(Customer.objects.values('order__customer','id','identification','full_name','order__total','order__created'))
     return render(request, 'store.html', {'products': products})
 
 def product_detail(request, product_id):
@@ -222,6 +225,10 @@ def enviar_email_en_html(request, vs_asunto,vs_to,vs_nombre,vs_telefono,vs_num_p
 
 def productos_top(request):
     producto = OrderItem.objects.values('product__id','product__name','product__description','product__price','product__image').annotate(cantidad_venta=Sum('quantity')).order_by('-cantidad_venta')
-
-
     return render(request, 'top_producto.html', {'products': producto})    
+
+def historico_pedidos(request):
+
+    historico_ventas = Customer.objects.values('order__customer','id','identification','full_name','order__total','order__created')
+    return render(request,'historico.html',{'historico': historico_ventas})
+    

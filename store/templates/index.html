@@ -48,7 +48,9 @@
             </a>
             <nav class="navbar bg-light">
               <div class="container-fluid">
-                <a href="{% url 'topProducto' %}" class="nav-link link-dark px-2">Top Productos          -</a>
+                <a href="{% url 'index' %}" class="nav-link link-dark px-2">Listado de Productos       -</a>                
+                <a href="{% url 'topProducto' %}" class="nav-link link-dark px-2">Top Productos        -</a>
+                <a href="{% url 'historico' %}" class="nav-link link-dark px-2">Historico Pedido       -</a>
                 <form  method="get" class="d-flex">
                   <!--
                   <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
