@@ -6,7 +6,7 @@
   {% for prod in products %}  
     <div class="col">
       <div class="card h-100">
-        <img src="/media/{{ prod.product__image.url }}" class="card-img-top">
+        <img src="/media/{{ prod.product__image }}" class="card-img-top">
         <div class="card-body">
           <h5 class="card-title">{{ prod.product__name }}</h5>
           <p class="card-text">{{ prod.product__description }}</p>
